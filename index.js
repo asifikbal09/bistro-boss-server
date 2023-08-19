@@ -20,13 +20,16 @@ const client = new MongoClient(uri, {
   },
 });
 
+// collection
+const menuCollection = client.db("BistroDb").collection("menu");
+const reviewCollection = client.db("BistroDb").collection("review");
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const menuCollection = client.db("BistroDb").collection("menu");
-    const reviewCollection = client.db("BistroDb").collection("review");
 
 
     app.get('/menu', async(req, res)=>{
