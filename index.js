@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 //
 const verifyJWT = (req, res, next) => {
-  const authorization = req.headers.authorization;
+  const authorization = req.headers?.authorization;
   if (!authorization) {
     res.status(401).send({ error: true, message: "Unauthorized access" });
   }
