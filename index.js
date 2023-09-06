@@ -1,15 +1,13 @@
 const express = require("express");
+require("dotenv").config();
 const app = express();
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json());
-
-
 
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers?.authorization;
@@ -45,10 +43,15 @@ const userCollection = client.db("BistroDb").collection("users");
 const reviewCollection = client.db("BistroDb").collection("review");
 const cardCollection = client.db("BistroDb").collection("cards");
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+const dbConnect = async () => {
+	try {
+		client.connect()
+		console.log('Travel Database Connected!')
+	} catch (error) {
+		console.log(error.name, error.message)
+	}
+}
+dbConnect()
 
     //json web token api
     app.post("/jwt", (req, res) => {
@@ -64,7 +67,9 @@ async function run() {
       const query = { email: email };
       const user = await userCollection.findOne(query);
       if (user?.role !== "admin") {
-        return res.status(403).send({ error: true, message: "forbidden message" });
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden message" });
       }
       next();
     };
@@ -81,7 +86,7 @@ async function run() {
     });
 
     //user related api
-    app.get("/users", verifyJWT,verifyAdmin, async (req, res) => {
+    app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -105,7 +110,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/cards",async (req, res) => {
+    app.get("/cards", async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
@@ -159,12 +164,6 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
-}
-run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("boss is setting");
