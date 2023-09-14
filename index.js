@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 const verifyJWT = (req, res, next) => {
-  const authorization = req.headers?.authorization;
+  const authorization = req.headers.authorization;
   if (!authorization) {
     res.status(401).send({ error: true, message: "Unauthorized access" });
   }
@@ -79,6 +79,22 @@ dbConnect()
       const result = await menuCollection.find().toArray();
       res.send(result);
     });
+
+    app.post('/menu',async (req,res)=>{
+      const newItem = req.body
+      const result = await menuCollection.insertOne(newItem)
+      res.send(result)
+    })
+
+    app.delete('/menu/:id', async(req, res)=>{
+      const id = req.params.id
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await menuCollection.deleteOne(query)
+      res.send(result)
+    })
+
     //review related api
     app.get("/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -110,7 +126,7 @@ dbConnect()
       res.send(result);
     });
 
-    app.get("/cards", async (req, res) => {
+    app.get("/cards",verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
@@ -134,7 +150,7 @@ dbConnect()
     });
 
     // user updated api
-    app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+    app.get("/users/admin/:email", verifyJWT,verifyAdmin, async (req, res) => {
       const email = req.params.email;
 
       if (req.decoded.email !== email) {
@@ -159,8 +175,7 @@ dbConnect()
       res.send(result);
     });
 
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
