@@ -148,7 +148,7 @@ app.delete("/cards/:id", async (req, res) => {
 });
 
 // user updated api
-app.get("/users/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+app.get("/users/admin/:email", verifyJWT, async (req, res) => {
   const email = req.params.email;
 
   if (req.decoded.email !== email) {
@@ -174,7 +174,7 @@ app.patch("/users/admin/:id", async (req, res) => {
 });
 
 // stripe payment api
-app.post("/create-payment-intent", async (res, req) => {
+app.post("/create-payment-intent", verifyJWT, async (req, res) => {
   const { price } = req.body;
   const amount = price * 100;
   const paymentIntent = await stripe.paymentIntents.create({
